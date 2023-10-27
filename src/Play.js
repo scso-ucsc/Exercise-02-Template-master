@@ -16,6 +16,9 @@ class Play extends Phaser.Scene {
         // add background grass
         this.grass = this.add.image(0, 0, 'grass').setOrigin(0)
 
+        //Displaying scores
+        this.shotCountText = this.add.text(width - 150, 20, "Shot Counter: " + shotCount);
+
         // add cup
         this.cup = this.physics.add.sprite(width / 2, height / 10, "cup"); //Adding "physics" to cup because it needs to collide with the ball
         this.cup.body.setCircle(this.cup.width / 4); //Setting a circular body
@@ -53,21 +56,29 @@ class Play extends Phaser.Scene {
 
         //Allowing user input
         this.input.on("pointerdown", (pointer) => { //On pointer down...
-            let shotDirection;
-            pointer.y <= this.ball.y ? shotDirection = 1 : shotDirection = -1;
-            this.ball.body.setVelocityX(Phaser.Math.Between(-this.SHOT_VELOCITY_X, this.SHOT_VELOCITY_X)); //Phaser.Math.Between returns a random value between two values
-            this.ball.body.setVelocityY(Phaser.Math.Between(this.SHOT_VELOCITY_Y_MIN, this.SHOT_VELOCITY_Y_MAX) * shotDirection);
+            let shotDirectionY, shotDirectionX;
+            pointer.x <= this.ball.x ? shotDirectionX = 1 : shotDirectionX = -1; //For X velocity
+            pointer.y <= this.ball.y ? shotDirectionY = 1 : shotDirectionY = -1;
+            //this.ball.body.setVelocityX(Phaser.Math.Between(-this.SHOT_VELOCITY_X, this.SHOT_VELOCITY_X)); //Phaser.Math.Between returns a random value between two values
+            this.ball.body.setVelocityX(Phaser.Math.Between(0, this.SHOT_VELOCITY_X) * shotDirectionX);
+            this.ball.body.setVelocityY(Phaser.Math.Between(this.SHOT_VELOCITY_Y_MIN, this.SHOT_VELOCITY_Y_MAX) * shotDirectionY);
+
+            shotCount += 1; //Increasing number of shots
         });
 
         //Setting collisions
         this.physics.add.collider(this.ball, this.cup, (ball, cup) => { //the (ball, cup) are new parameters
-            ball.destroy();
+            //ball.destroy(); //Destroying ball
+            ball.x = width / 2; //Resetting position and removing velocity
+            ball.y = height - height / 10;
+            ball.body.setVelocityX(0);
+            ball.body.setVelocityY(0);
         });
         this.physics.add.collider(this.ball, this.walls);
         this.physics.add.collider(this.ball, this.oneWay);
     }
 
     update() {
-
+        this.shotCountText.text = "Shot Counter: " + shotCount;
     }
 }
